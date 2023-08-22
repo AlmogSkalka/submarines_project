@@ -10,7 +10,6 @@ strategically locate submarines on a grid and attempt to sink each other's subma
 - [Getting Started](#getting-started)
 - [Usage](#usage)
 - [Contributing](#contributing)
-- [Technologies Used](#Technologies-Used)
 
 ## Technologies Used
 
@@ -67,7 +66,3 @@ Contributions are welcome! If you'd like to contribute to this project, please f
 ---
 
 Feel free to customize this README to fit your project's specific details and needs. You can include more sections, such as "Technologies Used," "Known Issues," or "Future Enhancements," depending on the complexity of your project.
-
-```
-
-```
