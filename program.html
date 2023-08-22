@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!--Regular JQuery-->
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <!--JQuery animations-->
+
+    <link href="StyleSheet.css" rel="stylesheet" />
+
+    <script src="submarines_array.js"></script>
+    <!--The JSON file with a JS extension-->
+    <script>
+      game = {};
+      playerWon = false;
+
+      function gameOver() {
+        $(".game").hide();
+        $("#GameOver").show();
+        localStorage.clear();
+        playerWon ? alert("You won!") : alert("Computer won!");
+      }
+
+      function initOldGame() {
+        if (localStorage["game"] != null || localStorage["game"] != undefined) {
+          $("#welcomePage").hide();
+          game = JSON.parse(localStorage["game"]);
+          console.log(game.shuffleArr1); //Prints the human boats array to the console log
+          console.log(game.shuffleArr2); //Prints the computer boats array to the console log
+          var counter = 0;
+          var strHtml1 = "<table>";
+
+          for (let i = 0; i < game.height; i++) {
+            strHtml1 += "<tr>";
+            for (let j = 0; j < game.width; j++) {
+              if (game.SubMarinesBoard[counter] == true) {
+                strHtml1 += '<td class="subP" id="p' + counter + '" ></td>'; //Builds the html definition to boat class
+              } else if (game.SubMarinesBoard[counter] == 3) {
+                strHtml1 += '<td class="RedTdP" id="p' + counter + '" ></td>'; //Builds the red cells
+              } else if (game.SubMarinesBoard[counter] == 4) {
+                strHtml1 += '<td class="GreyTd" id="p' + counter + '" ></td>'; //Builds the gray cells
+              } else {
+                strHtml1 += '<td class="cyanTd" id="p' + counter + '" ></td>'; //Builds the regular cells
+              }
+
+              counter++;
+            }
+            strHtml1 += "</tr>";
+          }
+          strHtml1 += "</table>";
+
+          document.getElementById("GameDiv").innerHTML = strHtml1;
+          var counter1 = 0;
+          var strHtml2 = "<table>";
+          for (let i = 0; i < game.height; i++) {
+            strHtml2 += "<tr>";
+            for (let j = 0; j < game.width; j++) {
+              if (game.SubMarinesBoard2[counter1] == 3) {
+                strHtml2 +=
+                  '<td class="RedTdC" id="' +
+                  counter1 +
+                  '" onclick="Game(this.id)" ></td>'; //Builds the red cells
+              } else if (game.SubMarinesBoard2[counter1] == 4) {
+                strHtml2 +=
+                  '<td class="GreyTd "id="' +
+                  counter1 +
+                  '" onclick="Game(this.id)"></td>'; //Builds the gray cells
+              } else {
+                strHtml2 +=
+                  '<td class="cyanTd" id="' +
+                  counter1 +
+                  '" onclick="Game(this.id)" ></td>'; //Builds the regular cells
+              }
+              counter1++;
+            }
+            strHtml2 += "</tr>";
+          }
+          strHtml2 += "</table>";
+          strHtml2 +=
+            '<button id="cheat" title="If clicked, all of the computer ships will be REVEALED." onclick="cheat()">Reveal all enemy ships :)</button>';
+          strHtml2 +=
+            '<button id="cheat" title="If clicked, all of the computer ships will be sinked." onclick="extraCheat()">Win the game like a cheater:)</button>';
+          document.getElementById("DigitalGameDiv").innerHTML = strHtml2;
+        } else alert("No previous game is saved, try launching a new game!");
+      }
+      function newGame() {
+        $("#welcomePage").hide();
+        localStorage.clear();
+        localStorage["OldGameExist"] = true;
+        let str = "<table>";
+        str += " <tr>";
+        str +=
+          " <td class='regularTd' colspan=4>Please input your desired submarines board dimensions here:</td>";
+        str += " </tr>";
+        str += "  <tr>";
+
+        str += " <tr>";
+        str += " <td class='regularTd'>Width:</td>";
+        str += " <td class='regularTd'>";
+        str += ' <input type="number" id="widthVar" value="15" />';
+        str += " </td>";
+        str += "   <td class='regularTd'>Height:</td>";
+        str += "  <td class='regularTd'>";
+        str += '   <input type="number" id="heightVar" value="15"/>';
+        str += "     </td>";
+        str += " </tr>";
+        str += "  <tr>";
+        str +=
+          "  <td class='regularTd'>  <input type='button' id='runBTN' value='run' onclick='gameConstructor()'/></td>";
+        str += " </tr>";
+        str += " </table>";
+        document.getElementById("ph").innerHTML = str;
+      }
+
+      game.SubMarinesBoard = []; //Human board born here
+      game.SubMarinesBoard2 = []; //Computer board initialized here
+      game.MaxSubTdAmountC = 0; //the var that will count the amount of tbl cells holding 1..* ships
+
+      //Starting the game constructing below:
+      function gameConstructor() {
+        $("#runBTN").hide();
+        $("#ph").hide();
+        for (var boardsAmount = 0; boardsAmount < 2; boardsAmount++) {
+          BoardArr = []; // horizontal board limits
+          game.height = parseInt(document.getElementById("heightVar").value); //Getting the height from the user input
+          game.width = parseInt(document.getElementById("widthVar").value); //Getting the width from the user input
+
+          if (
+            game.height >= 10 &&
+            game.height <= 20 &&
+            game.width >= 10 &&
+            game.width <= 20
+          ) {
+            for (let i = 0; i < game.height; i++) {
+              if (i == 0) {
+                BoardArr[i] = game.width - 1; //  BoardArr[0] = 14
+              } else {
+                BoardArr[i] = BoardArr[i - 1] + game.width; //BoardArr[1] = 14+15=29
+              }
+            }
+            var directionVar; // Decides which direction the submarine will be heading to
+            game.shuffleArr1 = []; // Human submarines
+            game.shuffleArr2 = []; // Computerized submarines
+            var subPosition = 0;
+            for (var i = 0; i < submarinesArr.length; i++) {
+              for (var j = 0; j < submarinesArr[i].amount; j++) {
+                let IsLocated = false; //If we haven't placed the boat yet, this will stay false
+                directionVar = Math.random(); //This will rand the direction of the boat, vertical or horizontal
+                while (IsLocated == false) {
+                  var firstPositionVar = Math.floor(
+                    Math.random() * game.height * game.width
+                  ); //Determines the first cell of our boat
+                  var SubMarinePositions = [];
+                  if (directionVar < 0.5) {
+                    // horizontal
+                    let MaxLinePosition = MaxBorder(firstPositionVar, BoardArr);
+                    if (
+                      firstPositionVar <
+                      MaxLinePosition - (submarinesArr[i].size - 1)
+                    ) {
+                      //building a boat
+                      for (var t = 0; t < submarinesArr[i].size; t++) {
+                        if (t == 0) SubMarinePositions[t] = firstPositionVar;
+                        //If the first cell was already initialized, then let's move on to the next cell of the boat
+                        else
+                          SubMarinePositions[t] = SubMarinePositions[t - 1] + 1; // t=1 ,shuffleArr1[x][t]=23
+                      }
+                      if (boardsAmount == 0) {
+                        game.shuffleArr1[subPosition] = SubMarinePositions; //Inserts the human boat into the array
+                      } else {
+                        game.shuffleArr2[subPosition] = SubMarinePositions; //Inserts the boat into the Computer array
+                      }
+                      subPosition++;
+                      IsLocated = true;
+                    } // can't build a boat in this position
+                    else {
+                      continue;
+                    }
+                  } // vertical
+                  else {
+                    if (
+                      firstPositionVar +
+                        (submarinesArr[i].size - 1) * game.width <
+                      game.height * game.width - 1
+                    ) {
+                      //building a boat
+                      for (var a = 0; a < submarinesArr[i].size; a++) {
+                        if (a == 0)
+                          // firstposition=22, size=3
+                          SubMarinePositions[a] = firstPositionVar;
+                        //  shuffleArr1[x][t]=22
+                        else
+                          SubMarinePositions[a] =
+                            SubMarinePositions[a - 1] + game.width; // t=1 ,shuffleArr1[x][t]=23
+                      }
+                      if (boardsAmount == 0) {
+                        game.shuffleArr1[subPosition] = SubMarinePositions; //Inserts the human boat into the array
+                      } else {
+                        game.shuffleArr2[subPosition] = SubMarinePositions; //Inserts the boat into the Computer array
+                      }
+                      subPosition++;
+                      IsLocated = true;
+                    } else {
+                      continue;
+                    } // can't build a boat in this position
+                  }
+                }
+              }
+            }
+
+            console.log(game.shuffleArr1); //Prints the human boats array to the console log
+            console.log(game.shuffleArr2); //Prints the computer boats array to the console log
+
+            if (boardsAmount == 0) {
+              //Players board
+              for (let i = 0; i < game.shuffleArr1.length; i++) {
+                for (let j = 0; j < game.shuffleArr1[i].length; j++) {
+                  game.SubMarinesBoard[game.shuffleArr1[i][j]] = true; // i=0, j=0 SubMarinesBoard[49]=true;
+                }
+              }
+              var counter = 0;
+
+              var strHtml = "<table id='PBoard'>";
+              for (let i = 0; i < game.height; i++) {
+                strHtml += "<tr>";
+                for (let j = 0; j < game.width; j++) {
+                  if (game.SubMarinesBoard[counter] == true) {
+                    strHtml += '<td class="subP" id="p' + counter + '" ></td>'; //Builds the html definition to player's boat class
+                  } else {
+                    strHtml +=
+                      '<td class="cyanTd" id="p' + counter + '" ></td>'; //Builds overall  cells
+                  }
+                  counter++;
+                }
+                strHtml += "</tr>";
+              }
+              strHtml += "</table>";
+
+              document.getElementById("GameDiv").innerHTML = strHtml; //inserts the string from above into the doc
+            } // computer's board
+            else {
+              for (let i = 0; i < game.shuffleArr2.length; i++) {
+                for (let j = 0; j < game.shuffleArr2[i].length; j++) {
+                  game.SubMarinesBoard2[game.shuffleArr2[i][j]] = true; // i=0, j=0 SubMarinesBoard[49]=true;
+                }
+              }
+              for (var d = 0; d < game.SubMarinesBoard2.length; d++) {
+                if (game.SubMarinesBoard2[d] == true) game.MaxSubTdAmountC++;
+              }
+
+              var counter = 0; //our ID var
+              var strHtml = '<table id="CBoard">'; //Creates the computer grid board by a tbl
+              for (let i = 0; i < game.height; i++) {
+                strHtml += "<tr>";
+                for (let j = 0; j < game.width; j++) {
+                  strHtml +=
+                    '<td class="cyanTd" id="' +
+                    counter +
+                    '" onclick="Game(this.id)"></td>'; //Builds the regular cells and tells them that if they are being clicked, that means that they have a function standing behind them
+                  counter++; //assigns the ID to each human board cell
+                }
+                strHtml += "</tr>";
+              }
+              strHtml += "</table>";
+
+              //CheatBTN is here to reveal the locations
+              strHtml += "</br>";
+
+              strHtml +=
+                '<button id="cheat" title="If clicked, all of the computer ships will be REVEALED." onclick="cheat()">Reveal all enemy ships :)</button>';
+              strHtml +=
+                '<button id="cheat" title="If clicked, all of the computer ships will be sinked." onclick="extraCheat()">Win the game like a cheater:)</button>';
+
+              document.getElementById("DigitalGameDiv").innerHTML = strHtml;
+              localStorage["game"] = JSON.stringify(game);
+            }
+          } else alert("Heigt and Width must have a value between 10 to 20 ");
+        }
+      } //end of gameconstructor
+
+      function MaxBorder(location, BoardArr) {
+        // returns the cell limits of the horizontal row
+        for (var i = 0; i < BoardArr.length; i++) {
+          if (location <= BoardArr[0]) {
+            return BoardArr[i]; //14
+          } else if (location >= BoardArr[i] && location <= BoardArr[i + 1]) {
+            // i=1, BoardArr[i]=14, BoardArr[i + 1]=29
+            return BoardArr[i + 1]; // 29
+          } else {
+            continue;
+          }
+        }
+      }
+      function Game(ParameterId) {
+        let ComputerTd = document.getElementById(ParameterId); //Computers td
+        if (
+          ComputerTd.className == "cyanTd" ||
+          ComputerTd.className == "subC"
+        ) {
+          if (game.SubMarinesBoard2[ParameterId] == true) {
+            ComputerTd.className = "RedTdC";
+            game.SubMarinesBoard2[ParameterId] = 3; //will be painted red
+          } else {
+            ComputerTd.className = "GreyTd";
+            game.SubMarinesBoard2[ParameterId] = 4; //will be painted gray
+          }
+
+          //end of players turn
+          var ComputerPlayed = false;
+          while (ComputerPlayed == false) {
+            var ComputerTurn = Math.floor(
+              Math.random() * game.height * game.width
+            );
+            var RandPositionP = document.getElementById("p" + ComputerTurn); //players td
+            if (
+              RandPositionP.className != "RedTdP" ||
+              RandPositionP.className != "GreyTd"
+            ) {
+              if (game.SubMarinesBoard[ComputerTurn] == true) {
+                RandPositionP.className = "RedTdP";
+                game.SubMarinesBoard[ComputerTurn] = 3;
+              } else {
+                RandPositionP.className = "GreyTd";
+                game.SubMarinesBoard[ComputerTurn] = 4;
+              }
+              ComputerPlayed = true;
+            }
+            localStorage["game"] = JSON.stringify(game);
+          }
+          let PlayerdWins = document.getElementsByClassName("RedTdC"); //Human player wins
+
+          if (PlayerdWins.length == game.MaxSubTdAmountC) {
+            playerWon = true;
+          }
+          let ComputersWins = document.getElementsByClassName("RedTdP");
+          let MaxSubTdAmountP = document.getElementsByClassName("subP"); //number of subs td in players board
+          if (ComputersWins.length == MaxSubTdAmountP) {
+            gameOver();
+          }
+        }
+        localStorage["game"] = JSON.stringify(game);
+      }
+
+      function cheat() {
+        for (var i = 0; i < game.SubMarinesBoard2.length; i++) {
+          var Temptd = document.getElementById(i);
+          if (
+            game.SubMarinesBoard2[i] == true &&
+            Temptd.className == "cyanTd"
+          ) {
+            Temptd.className = "subC";
+          }
+        }
+      }
+      function extraCheat() {
+        for (var i = 0; i < game.SubMarinesBoard2.length; i++) {
+          var tmpTD = document.getElementById(i);
+          if (game.SubMarinesBoard2[i] == true && tmpTD.className == "cyanTd") {
+            tmpTD.className = "RedTdC";
+          }
+        }
+        playerWon = true;
+        gameOver();
+      }
+    </script>
+  </head>
+  <body>
+    <div id="container">
+      <div id="welcomePage">
+        <h1>Submarines game</h1>
+        <input
+          type="button"
+          id="newGameBTN"
+          title="Initialize a new game"
+          value="New Game"
+          onclick="newGame()"
+        />
+        <input
+          type="button"
+          id="oldGameBTN"
+          title="Return to previous game"
+          value="Load previous progress"
+          onclick="initOldGame()"
+        />
+      </div>
+      <div id="ph" class="game"></div>
+      <!--//Controlers Div-->
+      <div id="twoBoards" class="game">
+        <div id="GameDiv"></div>
+        <!--// Human Board Div-->
+        <div id="DigitalGameDiv"></div>
+        <!--// Computer</div> Board Div-->
+      </div>
+      <div id="GameOver">
+        <img src="images/gameover.jpg" />
+      </div>
+    </div>
+  </body>
+</html>
