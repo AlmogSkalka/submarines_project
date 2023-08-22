@@ -1,7 +1,8 @@
 ````markdown
 # Submarines Game
 
-Welcome to the Submarines Game repository! This repository contains a browser-based game where players strategically locate submarines on a grid and attempt to sink each other's submarines.
+Welcome to the Submarines Game repository! This repository contains a browser-based game where players
+strategically locate submarines on a grid and attempt to sink each other's submarines.
 
 ## Table of Contents
 
