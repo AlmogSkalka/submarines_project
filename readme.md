@@ -37,9 +37,9 @@ You can visit my demo, or you can clone the repository to your local computer!
    ```bash
    git clone https://github.com/your-username/submarines-game.git
    ```
-````
 
 2. Open `index.html` in your preferred web browser.
+````
 
 ## Usage
 
