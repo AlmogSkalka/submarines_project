@@ -10,7 +10,13 @@ strategically locate submarines on a grid and attempt to sink each other's subma
 - [Getting Started](#getting-started)
 - [Usage](#usage)
 - [Contributing](#contributing)
-- [License](#license)
+- [Technologies Used](#Technologies-Used)
+
+## Technologies Used
+
+- HTML5
+- CSS3
+- Vanilla JavaScript
 
 ## Demo
 
