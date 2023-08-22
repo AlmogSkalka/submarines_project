@@ -43,7 +43,7 @@ You can visit my demo, or you can clone the repository to your local computer!
    git clone https://github.com/AlmogSkalka/submarines-game.git
    ```
 
-2. Open `index.html` in your preferred web browser.
+2. Open `program.html` in your preferred web browser.
 
 ## Usage
 
