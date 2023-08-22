@@ -1,4 +1,3 @@
-````markdown
 # Submarines Game
 
 Welcome to the Submarines Game repository! This repository contains a browser-based game where players
@@ -40,7 +39,6 @@ You can visit my demo, or you can clone the repository to your local computer!
    ```
 
 2. Open `index.html` in your preferred web browser.
-````
 
 ## Usage
 
