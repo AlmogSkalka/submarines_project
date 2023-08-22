@@ -40,7 +40,7 @@ You can visit my demo, or you can clone the repository to your local computer!
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/submarines-game.git
+   git clone https://github.com/AlmogSkalka/submarines-game.git
    ```
 
 2. Open `index.html` in your preferred web browser.
