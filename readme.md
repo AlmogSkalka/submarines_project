@@ -64,5 +64,3 @@ Contributions are welcome! If you'd like to contribute to this project, please f
 4. Submit a pull request explaining your changes.
 
 ---
-
-Feel free to customize this README to fit your project's specific details and needs. You can include more sections, such as "Technologies Used," "Known Issues," or "Future Enhancements," depending on the complexity of your project.
